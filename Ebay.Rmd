@@ -3,7 +3,7 @@ title: "**Data Preparation & Machine Learning with Ebay Shill Bidding data**"
 author: "Lucas Pontes"
 date: "`r format(Sys.time(), '%d %B %Y')`"
 output: 
-  html_document:
+  github_document:
     toc: true
     toc_depth: 2
 ---
@@ -16,12 +16,14 @@ library(treemapify)
 library(ggplot2)
 library(reshape2)
 library(viridis)
+library(tidyverse)
+library(hrbrthemes)
 SBD <- read_csv("https://archive.ics.uci.edu/ml/machine-learning-databases/00562/Shill%20Bidding%20Dataset.csv")
 ```
 
 # **Introduction**
 
-  The Shill Bidding Data set (`SBD`) comprise eBay auctions with many different features, including the duration of the auctions, bidder tendency and class, among others (Alzahrani and Sadaoui, 2018). The aim of this report is to submit the data to different supervised and unsupervised machine learning methods after properly characterisation and preparation of the dataset. To achieve the best result a scaling method will be applied and compared alongside feature reduction methods, machine-learning methods applied will also have the performance and accuracy level measured and compared. At the end of this report, the supervised and  unsupervised methods will be identified in order to work with optimal performance in the Shill Bidding Dataset. The predictions related to normal and abnormal bidding behaviour of eBay users may help companies to identify scams and other undesirable users within the platform.
+  The Shill Bidding Data set `SBD` comprise eBay auctions with many different features, including the duration of the auctions, bidder tendency and class, among others (Alzahrani and Sadaoui, 2018). The aim of this report is to submit the data to different supervised and unsupervised machine learning methods after properly characterisation and preparation of the dataset. To achieve the best result a scaling method will be applied and compared alongside feature reduction methods, machine-learning methods applied will also have the performance and accuracy level measured and compared. At the end of this report, the supervised and  unsupervised methods will be identified in order to work with optimal performance in the Shill Bidding Dataset. The predictions related to normal and abnormal bidding behaviour of eBay users may help companies to identify scams and other undesirable users within the platform.
 
 
 
@@ -38,6 +40,7 @@ SBD
 glimpse(SBD)
 summary(SBD)
 ```
+
   A first glance at `SBD` shows 6321 observations for 13 features, the first three columns represent the record ID, auction and the bidder respectively. The dplyr glimpse function displays all columns beside bidder ID as numeric, however, class and all IDs columns should be treated as a character class.
   
   
@@ -54,7 +57,7 @@ summary(SBD)
   
   The summary function exhibits some general descriptive statistics, it is noticeable that the data have been pre-processed as auction duration range from 0 to 10 and all other numerical features range from 0 to 1.
 
-### Exploratory Graphs
+## **Exploratory Graphs**
 
 ```{r}
 vis_miss(SBD)
@@ -86,13 +89,14 @@ table(SBD$Class)
 round(prop.table(table(SBD$Class)),digits=2)
 ```
 
-As displayed by the treemap and proportion table above, only 10.7% (675 observations) of the biddings on `SBD` are considered abnormal. The graph above does a great job showing the proportion. The conventional use of pie charts is not recommended to display proportion, especially when the feature contains multiple unique observations or small fractions, Human perception does not comprehend angular proportions in pie charts as it should (Hunt, 2019). 
+  As displayed by the treemap and proportion table above, only 10.7% (675 observations) of the biddings on `SBD` are considered abnormal. The graph above does a great job showing the proportion. The conventional use of pie charts is not recommended to display proportion, especially when the feature contains multiple unique observations or small fractions, Human perception does not comprehend angular proportions in pie charts as it should (Hunt, 2019). 
 
 
 ```{r include = FALSE}
 SBD_matrix <- as.matrix(SBD[, c(4:11)])
 corr_mat <- round(cor(SBD_matrix),2)
 melted_corr_mat <- melt(corr_mat)
+melt_SBD <- melt(SBD[,4:11])
 ```
 
 
@@ -104,11 +108,93 @@ theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
 scale_fill_viridis(discrete=FALSE) +
 geom_text(aes(Var2, Var1, label = value),
           color = "black", size = 4) +
-  labs(title = "Correlation Analysis")
+  labs(title = "Correlation Analysis") +
+xlab("") +
+ylab("")
 ```
 
-The heatmap above shows the correlation between all numerical features in a single graph. The problem with heatmaps is that slight colour intensity variations can be hard to perceive by human eyes, especially with certain colour combinations. Approximately 8% of men and 0.5% of women have some form of colourblindness (BioTuring’s Blog, 2018; Colour Blind Awareness, n.d.). The ggplot graph above has a colourblind friendly colour palette and an added numerical scale, allowing the viewer to check the exact correlation between the variables, as an example, the positive correlation between early and last bidding features is notorious. Another noticeable correlation is the negative one between the winning ratio and auction bids, for further investigation, both will be displayed in a scatter plot.
+  The heatmap above shows the correlation between all numerical features in a single graph. The problem with heatmaps is that slight colour intensity variations can be hard to perceive by human eyes, especially with certain colour combinations. Approximately 8% of men and 0.5% of women have some form of colourblindness (BioTuring’s Blog, 2018; Colour Blind Awareness, n.d.). The ggplot graph above has a colourblind friendly colour palette and an added numerical scale, allowing the viewer to check the exact correlation between the variables, as an example, the positive correlation between early and last bidding features is notorious. Another noticeable correlation is the negative one between the winning ratio and auction bids, for further investigation, both will be displayed in a scatter plot.
+
+```{r, warning=FALSE}
+ggplot(SBD, aes(x = Early_Bidding, y=Last_Bidding )) + 
+    geom_point(size=2,alpha= 0.3) +
+    theme_ipsum() +
+    ggtitle("Correlation between Early and Last Bidding")
+```
 
 
+  The scatter plot makes it noticeable why those two variables are so positive correlated, considering that the last bidding value can never be lower than the early bidding value. A positive slope can be found in the diagonal centre of the 2-dimensional plot, this line represents the values which were the same in both features.
 
+```{r, warning=FALSE}
+ggplot(SBD, aes(x = Winning_Ratio, y=Auction_Bids )) + 
+    geom_point(size=2,alpha= 0.3) +
+    theme_ipsum()+
+    ggtitle("Correlation between winning ratio and auction bids")
+```
+
+  Different from the previous scatter plot, this time the features auction bids and winning ratio, which had a negative correlation in the heatmap representation, do not show any visible correlation. This interaction will be later tested when used as a predictor in a linear regression method.  
+  
+  
+```{r, warning=FALSE}
+ggplot(SBD, aes(x= as.numeric(Record_ID))) +
+  geom_histogram( binwidth=300, fill="#69b3a2", color="#e9ecef", alpha=0.9) +
+  ggtitle("Record ID distribution") +
+  theme_ipsum() +
+  theme(plot.title = element_text(size=15))
+
+ggplot(SBD, aes(x= as.numeric(Auction_ID))) +
+  geom_histogram( binwidth=60, fill="#69b3a2", color="#e9ecef", alpha=0.9) +
+  ggtitle("Record ID distribution") +
+  theme_ipsum() +
+  theme(plot.title = element_text(size=15))
+```
+
+The histograms above display a clear difference between the distribution of the Auction and Record ID, as the x-axis of the Auction ID, is much shorter, this happens because many auctions are represented in the data set multiple times. Also, the Record ID displays some uniformity, even so not perfectly uniform, representing the absence of multiple observations with the same ID.
+
+```{r, warning=FALSE}
+ggplot(melt_SBD, aes(x=variable, y=value, fill=variable )) +
+  geom_boxplot() +
+  scale_fill_viridis(discrete = TRUE, alpha=0.6) +
+  theme_ipsum() +
+  theme(
+    legend.position="none",
+    plot.title = element_text(size=11)
+  ) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  ggtitle("Box plot for multiple variables") +
+  xlab("")
+```
+
+The Boxplot above shows the distribution of several numerical features with a range between 0 and 1. These 8 features were chosen to be represented by grouped boxplots since it is an exceptional alternative to viewing many distributions in a single graph, especially if the y-axis range matches all features. This figure is extremely informative, considering that it displays the distribution of the observations, the quartile range including the median, and the minimum and maximum values, which describe the range (Galarnyk, 2018).
+
+
+```{r, warning=FALSE}
+ggplot(SBD, aes(x= Auction_Duration)) +
+  geom_histogram( binwidth=1, fill="#69b3a2", color="#e9ecef", alpha=0.9) +
+  ggtitle("Auction Duration distribution") +
+  theme_ipsum() +
+  theme(plot.title = element_text(size=15))
+```
+
+Despite being a numerical feature, the low number of distinct values causes the histogram to not be aesthetically pleasing, however, it shows the 5 distinct values 7,3,1,5 and 10 and how many times each one appeared in the auction duration column. This pattern suggests five fixed auction durations options that the platform allows the sellers to choose from.
+
+# **Data cleaning**
+
+The importance of identifying and removing missing values from the data prior to modelling is that it can reduce its accuracy and cause bias in the analysis (Analytics Vidhya, 2021). As shown before, there is not a single missing value in the data. However, sometimes the missing values appear as non-standard, a different format that includes strings named "NA", "n/a", "--" and many other possibilities. Unfortunately, it is near-impossible to check for all of them, especially in datasets with numerous observations and features. When it happens the feature type can only be categorical, since 0 in numeric features should not be considered meaningless (Sullivan, 2018). This section aims to check and remove non-standard missing values that may be present in the "Bidder_ID" column.
+
+```{r}
+SBD <- SBD %>%
+  mutate(Bidder_ID = replace(Bidder_ID, Bidder_ID == "na", NA)) %>%
+  mutate(Bidder_ID = replace(Bidder_ID, Bidder_ID == "N/A", NA)) %>%
+  mutate(Bidder_ID = replace(Bidder_ID, Bidder_ID == "--", NA)) %>%
+  mutate(Bidder_ID = replace(Bidder_ID, Bidder_ID == "n/a", NA)) 
+
+sum(is.na(SBD$Bidder_ID))
+```
+
+Checking for common strings associated with non-standard missing values, the result of the analysis indicates the complete absence of them.
+
+# **Feature engineering**
+
+As an important stage preceding the machine learning modelling, this task requires the judgement of the data analyst and numerous trials and errors. Feature engineering is the act of transforming a given feature space with different tools, especially mathematical, with the main goal of improving the model performance (Khurana, Samulowitz and Turaga, 2018).The first step will be removing unnecessary columns for the future tasks, the first three columns only include the IDs for the record, auction and bidder respectively and do not add any significance to the analysis.
 
