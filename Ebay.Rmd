@@ -18,6 +18,7 @@ library(reshape2)
 library(viridis)
 library(tidyverse)
 library(hrbrthemes)
+library(knitr)
 SBD <- read_csv("https://archive.ics.uci.edu/ml/machine-learning-databases/00562/Shill%20Bidding%20Dataset.csv")
 ```
 
@@ -178,6 +179,21 @@ ggplot(SBD, aes(x= Auction_Duration)) +
 
 Despite being a numerical feature, the low number of distinct values causes the histogram to not be aesthetically pleasing, however, it shows the 5 distinct values 7,3,1,5 and 10 and how many times each one appeared in the auction duration column. This pattern suggests five fixed auction durations options that the platform allows the sellers to choose from.
 
+```{r, results = 'asis'}
+SBD[,4:13] %>%
+pivot_wider(names_from = Class,
+            values_from = c("Bidder_Tendency", "Bidding_Ratio", "Successive_Outbidding", "Last_Bidding","Auction_Bids", 
+                            "Starting_Price_Average" , "Early_Bidding" ,
+                            "Winning_Ratio" , "Auction_Duration" ), values_fn = ~mean(.x)) %>%
+as.data.frame() %>% 
+t() %>%
+kable(format = "html")
+```
+
+The pivot table above points to a substantial difference in the mean value for most features when
+compared to normal and abnormal bidding patterns. This information is important since the class
+feature will be the dependable variable for machine learning models in the next steps.
+
 # **Data cleaning**
 
 The importance of identifying and removing missing values from the data prior to modelling is that it can reduce its accuracy and cause bias in the analysis (Analytics Vidhya, 2021). As shown before, there is not a single missing value in the data. However, sometimes the missing values appear as non-standard, a different format that includes strings named "NA", "n/a", "--" and many other possibilities. Unfortunately, it is near-impossible to check for all of them, especially in datasets with numerous observations and features. When it happens the feature type can only be categorical, since 0 in numeric features should not be considered meaningless (Sullivan, 2018). This section aims to check and remove non-standard missing values that may be present in the "Bidder_ID" column.
@@ -198,3 +214,53 @@ Checking for common strings associated with non-standard missing values, the res
 
 As an important stage preceding the machine learning modelling, this task requires the judgement of the data analyst and numerous trials and errors. Feature engineering is the act of transforming a given feature space with different tools, especially mathematical, with the main goal of improving the model performance (Khurana, Samulowitz and Turaga, 2018).The first step will be removing unnecessary columns for the future tasks, the first three columns only include the IDs for the record, auction and bidder respectively and do not add any significance to the analysis.
 
+```{r}
+SBD <- as.data.frame(SBD[,4:13])
+head(SBD)
+```
+
+
+As observed by the correlation of early and last biding in the scatter plot, the early bidding can never exceed the last bidding in value, however, what eventually happens is that the auction has no increase in price and culminate in the same value. To join the information of the two columns in one and add extra information to the future predictive model, a new column named "Bidding difference" will substitute them with the existing incremented value calculated by the difference between their prices.
+
+```{r}
+SBD$Bidding_difference <- SBD$Last_Bidding - SBD$Early_Bidding
+SBD <- as.data.frame(SBD[, c(-4,-7) ])
+SBD <- SBD[order(SBD$Bidding_difference),]
+head(SBD,30)
+```
+
+Calculating the difference between last and early bidding resulted in a feature with 25 negative values unexpected, suggesting that in these 25 observations the trade was concluded with the last bidding having a lower value than the early bidding, which is counterintuitive.
+
+```{r}
+SBD$Auction_Duration <- SBD$Auction_Duration / 10
+
+ggplot(SBD, aes(x= Auction_Duration)) +
+  geom_histogram( binwidth=0.1, fill="#69b3a2", color="#e9ecef", alpha=0.9) +
+  ggtitle("Scaled Auction Duration distribution") +
+  theme_ipsum() +
+  theme(plot.title = element_text(size=15))
+```
+
+Since all other metrics range from 0 to 1, dividing the auction duration variable by 10 puts it in the same range. This may reduce the chance of this variable disproportionately impacting the model.
+
+# **Data scaling**
+
+The different orders of magnitude may bias the results since most machine learning algorithms calculate the output using Euclidean distance (Asaithambi, 2017). As seen in the distribution of the previous boxplots and histograms the numeric features contain some outliers, considering the putative relevance of these outliers in the machine learning analysis, the ideal transformation method will maintain the impact of these feature outliers in the output of the machine learning algorithm to be performed. The two regularly used scaling methods are standardization and normalization, for this dataset the standardization will be applied as the transformation method of choice, since it copes better with outliers than normalization methods (GeeksforGeeks, 2020).
+
+As displayed before, except for a few negative values in the Bidding difference column, all features range from 0 to 1. Data scaling is necessary when the features of a dataset have a different range or order of magnitude (Roy, 2020), which is not the case, taking that into consideration the data scaling may not be necessary for that instance. However, to evaluate that, the "X_s" variable will contain that scaled data to be compared to the not-scaled data.
+
+
+```{r}
+X <- SBD[,-8]
+y <- SBD[,8]
+X_s <- scale(X)
+head(X)
+head(y)
+head(X_s)
+```
+
+The scaled variables are going to be had their performance measured in the feature reducing methods and the Random Forest Classification machine learning method to come, after the comparison, the one with better predictive power will be applied in the following tasks.
+
+# **Linear Discriminant Analysis (LDA)**
+
+In pattern classification using a Machine Learning algorithm, the training vectors are evaluated by comparing them to the test split, a common problem that can reduce its accuracy is the large dimensionality of the data, and numerous features reducing the robustness of the pattern classifiers. Linear discriminant analysis or LDA is a supervised technique that generally exceeds other techniques when applied to feature classification, LDA method reduces the number of features that fit in the different classes prior to classification while maintaining the classes well separated in this lower dimensional space (Sharma and Paliwal, 2014).
