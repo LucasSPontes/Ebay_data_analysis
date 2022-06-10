@@ -231,7 +231,7 @@ head(SBD,30)
 
 Calculating the difference between last and early bidding resulted in a feature with 25 negative values unexpected, suggesting that in these 25 observations the trade was concluded with the last bidding having a lower value than the early bidding, which is counterintuitive.
 
-```{r}
+```{r, warning=FALSE}
 SBD$Auction_Duration <- SBD$Auction_Duration / 10
 
 ggplot(SBD, aes(x= Auction_Duration)) +
