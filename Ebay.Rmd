@@ -311,7 +311,8 @@ Originating from the centre point of the graph above the arrows indicate the con
 
 ## **Linear Discriminant Analysis (LDA)**
 
-Another technique used to approach the high-dimensionality problem is the Linear discriminant analysis or LDA, which different from PCA, is a supervised technique that generally exceeds other techniques when applied to feature classification, LDA method reduces the number of features that fit in the different classes prior to classification while maintaining the classes well separated in this lower dimensional space (Sharma and Paliwal, 2014).
+Another technique used to approach the high-dimensionality problem is the Linear discriminant analysis or LDA, which different from PCA, is a supervised technique that generally exceeds other techniques when applied to feature classification, LDA method reduces the number of features that fit in the different classes prior to classification while maintaining the classes well separated in this lower dimensional space (Sharma and Paliwal, 2014). The data will be split into an 80% training, and 20% test split, this is the most common split of
+data considered one of the best ranges to avoid overfitting (Askpython, 2020).
 
 
 ```{r, warning=FALSE,echo = FALSE}
@@ -373,7 +374,8 @@ Clustering is a valuable set of methods used in many applications, these unsuper
 
 This clustering algorithm is the most widely employed, the goal of K-Means unsupervised technique is to partition the observations into k clusters so the observations can be grouped based on the closest mean (Dubey and Choubey, 2017).
   
-  
+#### **SBD K-Means Clustering**
+
 ```{r, warning=FALSE,echo = FALSE}
 fviz_nbclust(SBD[,-8], kmeans, method = 'gap_stat') +
 labs(title= "SBD optimal number of clusters")
@@ -389,7 +391,8 @@ labs(title= "SBD Cluster plot")
   
 Setting four different clusters better identify the nature of the features related to normal and abnormal observations. The scatter plot displays the separation of the clusters by colour, each colour associated with one cluster. As we know, based on the class feature, which is not being used on unsupervised algorithms like k-means and hierarchical agglomerative clustering. The data is supposed to be divided into two categories, however, the normal bidding behaviour has a way bigger proportion than abnormal behaviour, thus being subjected to multiple patterns within itself (Maklin, 2019).
 
-  
+#### **PCA transformed K-Means Clustering**
+
 ```{r, warning=FALSE,echo = FALSE}
 fviz_nbclust(SBD_transform, kmeans, method = 'gap_stat') +
 labs(title= "PCA transformed SBD optimal number of clusters")
@@ -409,6 +412,7 @@ As exhibited in the scatter plot above the PCA transformed data achieve a fantas
 
 As with other multivariate methods, the implemented hierarchical agglomerative clustering algorithm is an essential tool for the embedded classification of numerical features using sets of variables. This method is usually applied when the data has a large number of partitions each one correlated with a level of the hierarchy (Murtagh and Contreras, 2017).
 
+#### **SBD Hierarchical Agglomerative Clustering**
 
 ```{r, warning=FALSE,echo = FALSE, fig.width = 14, fig.height = 9}
 dist_mat <- dist(SBD[,-8], method = 'euclidean')
@@ -423,7 +427,9 @@ plot(avg_col_dend, main = "SBD Cluster Dendogram" )
 ```
 
 The dendrogram graphic representation above represents the number of partitions within the data. Asobserved, the ideal number of clusters is also four, as obtained in the k-means section, this is noticeable by inspecting the vertical axis (Maklin, 2019).
-  
+
+#### **PCA transformed Hierarchical Agglomerative Clustering**
+
 ```{r, warning=FALSE,echo = FALSE, fig.width = 14, fig.height = 9}
 dist_mat_PCA <- dist(SBD_transform, method = 'euclidean')
 hclust_avg_PCA <- hclust(dist_mat_PCA, method = 'average')
@@ -447,6 +453,7 @@ Both K-Means and Hierarchical Agglomerative Clustering exhibited similar results
 
   The Random Forest Classification technique can be applied in both regression and classification, this supervised learning methodology performs well with numerous and imbalanced datasets, dealing with missing data efficiently (More and Rana, 2017).
 
+#### **SBD Random Forest Classification**
 ```{r, warning=FALSE,echo = FALSE}
 SBD.rf <- randomForest(Class ~., 
                         data = training_set, 
@@ -456,8 +463,12 @@ print(SBD.rf)
 ```
 
 ```{r, warning=FALSE,echo = FALSE}
-plot(SBD.rf)
+plot(SBD.rf, main = "SBD Random Forest" )
 ```
+
+The non-transformed data were fitted in the random forest classifier method and resulted in an estimated error rate of 0.65% after running 500 decision trees, which is extremely good. The confusion matrix shows the superb predictive power of the model.However, The fact that not every good and precise model performs as accurate in real-world scenarios should be considered (Kumar, 2020). The same code will be adapted and applied to the data transformed by the LDA method, and the results compared. 
+
+#### **LDA transformed Random Forest Classification**
 
 ```{r, warning=FALSE,echo = FALSE}
 LDASBD.rf <- randomForest(class ~ ., 
@@ -468,13 +479,17 @@ print(LDASBD.rf)
 ```
 
 ```{r, warning=FALSE,echo = FALSE}
-plot(LDASBD.rf)
+plot(LDASBD.rf, main = "LDA transformed SBD Random Forest" )
 ```
+
+The accuracy score comparison indicates the LDA transformed data as the best approach, resulting in an amazing 0% error rate. The confusion matrix displays that the model is 100% precise in identifying normal behaviour in both cases, which is expected considering that the data contains almost 10 times more normal than abnormal. A recommendation for future analysis would be collect data with more abnormal observations to make the model even more reliable (Kohli, 2019).
   
 ### **K-Nearest Neighbours**
 
   Mostly used as a classifier, K-Nearest Neighbours or KNN method do its calculations using euclidean distance. This supervised non-parametric method is known for its simplicity and efficacy (Taunk et al., 2019).
-  
+
+#### **SBD K-Nearest Neighbours**
+
 ```{r, warning=FALSE,echo = FALSE} 
 classifier_knn <- knn(train = training_set,
                       test = test_set ,
@@ -486,9 +501,10 @@ cm
   
 
 misClassError <- mean(classifier_knn != test_set$Class)
-print(paste('Accuracy =', 1-misClassError))
+print(paste('SBD Accuracy =', 1-misClassError))
 ```
 
+#### **LDA transformed K-Nearest Neighbours**
 ```{r, warning=FALSE,echo = FALSE} 
 classifier_knn_lda <- knn(train = training_set_lda,
                       test = test_set_lda ,
@@ -499,29 +515,37 @@ cm_lda <- table(test_set_lda$class, classifier_knn_lda)
 cm_lda
   
 misClassError_lda <- mean(classifier_knn_lda != test_set_lda$class)
-print(paste('Accuracy =', 1-misClassError_lda))
+print(paste('LDA transformed SBD Accuracy =', 1-misClassError_lda))
 ```
 
+The K-Nearest Neighbours prediction using Euclidean distance is displayed by the confusion matrix with 100% precision in both transformed and non-transformed data, this 100% accuracy score is similar to the one obtained in the previous method.
 
 ### **Decision Tree**
 
   Another supervised method, decision tree method combines a sequence of straightforward techniques, in which each one makes use of a threshold value as a metric against possible values, this method classifies the data that fall in a particular region as integrated to the most recurrent class in that region. The decision tree's main goal is to depict a tree with its findings data patterns accomplished by checking which test best separate the different cases into classes (Kotsiantis, 2011).
 
+#### **SBD Decision tree**
 
 ```{r, warning=FALSE,echo = FALSE} 
 tree.SBD <- rpart(Class ~., data = training_set)
 rpart.plot(tree.SBD)
 ```
 
+The decision tree plot above exhibits on its nodes insights about the data, the first one reiterates that the data is composed of only 11% abnormal bidding behaviour. Following the track, the decision tree asks if successive outbidding is inferior to 0.25, if it is true it directs to the left root, which displays the fact that 87% of the normal bidding behaviour falls in this category (Johnson, 2022).
+
 ```{r, warning=FALSE,echo = FALSE} 
 printcp(tree.SBD)
 plotcp(tree.SBD)
 ```
 
+
+
 ```{r, warning=FALSE,echo = FALSE} 
 p <- predict(tree.SBD, training_set, type = 'class')
 confusionMatrix(p, training_set$Class )
 ```
+
+Amazing 99.4% accuracy obtained, the confusion matrix only reported nine false negatives, and twenty false positives in 5057 observation. 
 
 
 ```{r, warning=FALSE,echo = FALSE}
@@ -538,18 +562,25 @@ plot.roc(r1,
          max.auc.polygon=TRUE,
          auc.polygon.col="lightblue",
          print.thres=TRUE,
-         main= 'ROC Curve')
+         main= 'SBD ROC Curve')
 ```
+
+ROC curves can be employed to distinguish the balance of sensitivity and specificity when dealing with binary classifiers, the result can be interpreted as a measure of the predictive robustness of a model (Horton, 2016). As expected from the previous results the ROC curve displays a result close to perfection, the bidding behaviour is indeed very predictable as observed in the true positive rate (y-axis) versus false positive rate (x-axis) as also shown in the confusion matrix.
+
+#### **LDA transformed Decision tree**
 
 ```{r, warning=FALSE,echo = FALSE} 
 tree.LDA <- rpart(class ~ .,data = training_set_lda)
 rpart.plot(tree.LDA)
 ```
 
+The single dimensionality of the LDA transformed data allows the decision tree to cover the complexity of the data set in a unique partitioning
+
 ```{r, warning=FALSE,echo = FALSE} 
 printcp(tree.LDA)
 plotcp(tree.LDA)
 ```
+
 
 ```{r, warning=FALSE,echo = FALSE} 
 p <- predict(tree.LDA, training_set_lda, type = 'class')
@@ -571,12 +602,15 @@ plot.roc(r1,
          max.auc.polygon=TRUE,
          auc.polygon.col="lightblue",
          print.thres=TRUE,
-         main= 'ROC Curve')
+         main= 'LDA transformed ROC Curve')
 ```
+
+The LDA transformed data resulted in perfect predictions, reporting even better results than the already exceptional obtained from the untransformed data.
+
 
 ### **Comparison of ML algorithms for Classification**
 
-Every single supervised algorithm resulted in an outstanding performance, Random Forest Classification, K-Nearest Neighbours and Decision Tree resulted in an accuracy score of over 97%, with minor differences between them. K-Nearest Neighbours had the best accuracy score, however, the difference is negligible, it is safe to say that the predictions of all three methods are suitable.
+Every single supervised algorithm resulted in an outstanding performance, Random Forest Classification, K-Nearest Neighbours and Decision Tree resulted in an accuracy score of over 98% on SBD predictions and 100% on LDA transformed data, with minor differences between them. K-Nearest Neighbours had the best accuracy score, however, the difference is negligible, it is safe to say that all algorithms applied are suitable for predictions on SBD.
 
 
 
@@ -594,6 +628,10 @@ Every single supervised algorithm resulted in an outstanding performance, Random
 finnstats (2021). Linear Discriminant Analysis in R | R-bloggers. [online] Available at: https://www.r-bloggers.com/2021/05/linear-discriminant-analysis-in-r/.
 
 Hayden, L.(2018). R PCA Tutorial (Principal Component Analysis). [online] Available at: https://www.datacamp.com/tutorial/pca-analysis-r [Accessed 16 Jun. 2022].
+
+Horton, B.(2016). ROC Curves in Two Lines of R Code. [online] Available at: https://blog.revolutionanalytics.com/2016/08/roc-curves-in-two-lines-of-code.html#:~:text=ROC%20curves%20are%20commonly%20used [Accessed 20 Jun. 2022].
+
+Johnson, D.(2022). Decision Tree in R with Example. [online] Available at: https://www.guru99.com/r-decision-trees.html.
 
 Tibshirani, R., Walther, G. and Hastie, T. (2001). Estimating the number of clusters in a data set via the gap statistic. Journal of the Royal Statistical Society: Series B (Statistical Methodology), [online] 63(2), pp.411–423. doi:10.1111/1467-9868.00293.
 
