@@ -43,13 +43,13 @@ SBD <- read_csv("https://archive.ics.uci.edu/ml/machine-learning-databases/00562
 
 # **Introduction**
 
-The Shill Bidding Data set `SBD` comprise eBay auctions with many different features, including the duration of the auctions, bidder tendency and class, among others (Alzahrani and Sadaoui, 2018). The aim of this report is to submit the data to different supervised and unsupervised machine learning methods after properly characterisation and preparation of the dataset. To achieve the best result a scaling method will be applied alongside feature reduction methods, machine-learning methods applied will have the performance and accuracy level measured and compared. At the end of this report, the supervised and  unsupervised methods will be identified in order to work with optimal performance in the Shill Bidding Dataset. The predictions related to normal and abnormal bidding behaviour of eBay users may help companies to identify scams and other undesirable users within the platform.
+The Shill Bidding Data set `SBD` comprise eBay auctions with many different features, including the duration of the auctions, bidder tendency and class, among others (Alzahrani and Sadaoui, 2018). The aim of this report is to submit the data to different supervised and unsupervised machine learning methods after properly characterisation and preparation of the dataset. To achieve the best result a scaling method is applied alongside feature reduction methods, machine-learning methods applied had their performance and accuracy level measured and compared. At the end of this report, the supervised and  unsupervised methods were identified in order to work with optimal performance in the Shill Bidding Dataset. The predictions related to normal and abnormal bidding behaviour of eBay users is capable of helping companies to identify scams and other undesirable users within the platform.
 
 # **Data preparation**
 
 ## **Data characterisation**
 
-Data characterisation is defined as the pre-processing phase of summarization of the different features and characteristics presents in the observations of a given data set, this process may be accomplished by introducing the data to the viewer using statistics measure summaries, and presenting visually using graphs, like bar charts and scatter plots (Capozzoli, Cerquitelli and Piscitelli, 2016; Han, Kamber and Pei, 2012).
+Data characterisation is defined as the pre-processing phase of summarization of the different features and characteristics presents in the observations of a given data set, this process is typically accomplished by introducing the data to the viewer using statistics measure summaries, and presenting visually using graphs, like bar charts and scatter plots (Capozzoli, Cerquitelli and Piscitelli, 2016; Han, Kamber and Pei, 2012).
 
 
 
@@ -131,7 +131,7 @@ xlab("") +
 ylab("")
 ```
 
-The heatmap above shows the correlation between all numerical features in a single graph. The problem with heatmaps is that slight colour intensity variations can be hard to perceive by human eyes, especially with certain colour combinations. Approximately 8% of men and 0.5% of women have some form of colourblindness (BioTuring’s Blog, 2018; Colour Blind Awareness, n.d.). The ggplot graph above has a colourblind friendly colour palette and an added numerical scale, allowing the viewer to check the exact correlation between the variables, as an example, the positive correlation between early and last bidding features is notorious. Another noticeable correlation is the negative one between the winning ratio and auction bids, for further investigation, both will be displayed in a scatter plot.
+The heatmap above shows the correlation between all numerical features in a single graph. The ggplot graph above has a colourblind friendly colour palette and an added numerical scale, allowing the viewer to check the exact correlation between the variables, as an example, the positive correlation between early and last bidding features is notorious. Another noticeable correlation is the negative one between the winning ratio and auction bids, for further investigation, both is displayed in a scatter plot.
 
 ```{r, warning=FALSE,echo = FALSE}
 ggplot(SBD, aes(x = Early_Bidding, y=Last_Bidding )) + 
@@ -150,7 +150,7 @@ ggplot(SBD, aes(x = Winning_Ratio, y=Auction_Bids )) +
     ggtitle("Correlation between winning ratio and auction bids")
 ```
 
-Different from the previous scatter plot, this time the features auction bids and winning ratio, which had a negative correlation in the heatmap representation, do not show any visible correlation. This interaction will be later tested when used as a predictor in a linear regression method.  
+Different from the previous scatter plot, this time the features auction bids and winning ratio, which had a negative correlation in the heatmap representation, do not show any visible correlation. This interaction was tested when used as a predictor in a linear regression method.  
   
   
 ```{r, warning=FALSE,echo = FALSE}
@@ -207,7 +207,7 @@ t() %>%
 kable(format = "html")
 ```
 
-The pivot table above points to a substantial difference in the group means value for most features when compared to normal and abnormal bidding patterns. This information is important since the class feature will be the dependable variable for machine learning models in the next steps.
+The pivot table above points to a substantial difference in the group means value for most features when compared to normal and abnormal bidding patterns. The class feature is the dependable variable for machine learning models in the next steps.
 
 ## **Data cleaning**
 
@@ -227,7 +227,7 @@ Checking for common strings associated with non-standard missing values, the res
 
 ## **Feature engineering**
 
-As an important stage preceding the machine learning modelling, this task requires the judgement of the data analyst and numerous trials and errors. Feature engineering is the act of transforming a given feature space with different tools, especially mathematical, with the main goal of improving the model performance (Khurana, Samulowitz and Turaga, 2018).The first step will be removing unnecessary columns for the future tasks, the first three columns only include the IDs for the record, auction and bidder respectively and do not add any significance to the analysis.
+As an important stage preceding the machine learning modelling, this task requires the judgement of the data analyst and numerous trials and errors. Feature engineering is the act of transforming a given feature space with different tools, especially mathematical, with the main goal of improving the model performance (Khurana, Samulowitz and Turaga, 2018).The first step is removing unnecessary columns for the future tasks, the first three columns only include the IDs for the record, auction and bidder respectively and do not add any significance to the analysis.
 
 ```{r,echo = FALSE}
 SBD <- as.data.frame(SBD[,4:13])
@@ -235,7 +235,7 @@ head(SBD)
 ```
 
 
-As observed by the correlation of early and last biding in the scatter plot, the early bidding can never exceed the last bidding in value, however, what eventually happens is that the auction has no increase in price and culminate in the same value. To join the information of the two columns in one and add extra information to the future predictive model, a new column named "Bidding difference" will substitute them with the existing incremented value calculated by the difference between their prices.
+As observed by the correlation of early and last biding in the scatter plot, the early bidding can never exceed the last bidding in value, however, what eventually happens is that the auction has no increase in price and culminate in the same value. To join the information of the two columns in one and add extra information to the future predictive model, a new column named "Bidding difference" is substituting them with the existing incremented value calculated by the difference between their prices.
 
 ```{r,echo = FALSE}
 SBD$Bidding_difference <- SBD$Last_Bidding - SBD$Early_Bidding
@@ -245,17 +245,6 @@ head(SBD,30)
 ```
 
 Calculating the difference between last and early bidding resulted in a feature with 25 negative values unexpected, suggesting that in these 25 observations the trade was concluded with the last bidding having a lower value than the early bidding, which is counterintuitive.
-
-```{r, warning=FALSE,echo = FALSE}
-SBD$Auction_Duration <- SBD$Auction_Duration / 10
-ggplot(SBD, aes(x= Auction_Duration)) +
-  geom_histogram( binwidth=0.1, fill="#69b3a2", color="#e9ecef", alpha=0.9) +
-  ggtitle("Auction Duration distribution") +
-  theme_ipsum() +
-  theme(plot.title = element_text(size=15))
-```
-
-Since all other metrics range from 0 to 1, dividing the auction duration variable by 10 puts it in the same range. This may reduce the chance of this variable impacting the model disproportionately.
 
 ## **Data scaling**
 
@@ -276,7 +265,18 @@ ggplot(aes(x=variable, y=value, fill=variable )) +
   xlab("")
 ```
 
-As displayed before, except for a few negative values in the Bidding difference column, all features range from 0 to 1, the data was probably been already pre-processed. Data scaling is necessary when the features of a dataset have a different range or order of magnitude (Roy, 2020), which is not the case for both, taking that and the fact that the outliers may be important for the analysis, the data scaling will not be employed.
+```{r, warning=FALSE,echo = FALSE}
+SBD$Auction_Duration <- SBD$Auction_Duration / 10
+ggplot(SBD, aes(x= Auction_Duration)) +
+  geom_histogram( binwidth=0.1, fill="#69b3a2", color="#e9ecef", alpha=0.9) +
+  ggtitle("Auction Duration distribution") +
+  theme_ipsum() +
+  theme(plot.title = element_text(size=15))
+```
+
+Since all other metrics range from 0 to 1, dividing the auction duration variable by 10 puts it in the same range. This reduces the chance of this variable impacting the model disproportionately compared to other features.
+
+As displayed before, except for a few negative values in the Bidding difference column, all features range from 0 to 1, the data was probably been already pre-processed. Data scaling is necessary when the features of a dataset have a different range or order of magnitude (Roy, 2020), which is not the case for both, taking that and the fact that the outliers is important for the analysis, further data scaling was not employed.
 
 # **Dimensionality reduction**
 
@@ -294,7 +294,7 @@ SBD.PCA <- prcomp(x = SBD[,-8],
 summary(SBD.PCA)
 ```
 
-The analysis resulted in 8 principal components, the first two explain 70% of the total variance. Five components will be applied for the upcoming clustering algorithms, considering that this amount is enough to describe over 93% of the total variance (Hayden, 2018).
+The analysis resulted in 8 principal components, the first two explain 70% of the total variance. Five components were applied for the upcoming clustering algorithms, considering that this amount is enough to describe over 93% of the total variance (Hayden, 2018).
 
 
 ```{r, warning=FALSE,include = FALSE}
@@ -311,8 +311,7 @@ Originating from the centre point of the graph above the arrows indicate the con
 
 ## **Linear Discriminant Analysis (LDA)**
 
-Another technique used to approach the high-dimensionality problem is the Linear discriminant analysis or LDA, which different from PCA, is a supervised technique that generally exceeds other techniques when applied to feature classification, LDA method reduces the number of features that fit in the different classes prior to classification while maintaining the classes well separated in this lower dimensional space (Sharma and Paliwal, 2014). The data will be split into an 80% training, and 20% test split, this is the most common split of
-data considered one of the best ranges to avoid overfitting (Askpython, 2020).
+Another technique used to approach the high-dimensionality problem is the Linear discriminant analysis or LDA, which different from PCA, is a supervised technique that generally exceeds other techniques when applied to feature classification, LDA method reduces the number of features that fit in the different classes prior to classification while maintaining the classes well separated in this lower dimensional space (Sharma and Paliwal, 2014). The data was split into an 80% training, and 20% test split, this is the most common split of data considered one of the best ranges to avoid overfitting (Askpython, 2020).
 
 
 ```{r, warning=FALSE,echo = FALSE}
@@ -359,7 +358,7 @@ ggplot(training_set_lda, aes(x=LD1, y = 0, color=class)) +
 ldahist(data = training_set_lda$LD1, g = training_set_lda$class)
 ```
 
-LD1 does a great job separating the different classes in a single dimension, there are almost no overlaps between normal and abnormal bidding behaviour (finnstats, 2021). This result suggests high predictive accuracy in the classification algorithms that will be applied in the following sections.
+LD1 does a great job separating the different classes in a single dimension, there are almost no overlaps between normal and abnormal bidding behaviour (Finnstats, 2021). This result suggests high predictive accuracy in the classification algorithms that were applied in the following sections.
 
 # **Machine Learning**
 
@@ -367,7 +366,7 @@ The concept of Machine Learning is a measurable improvement in a computer progra
 
 ## **Clustering algorithms**
 
-Clustering is a valuable set of methods used in many applications, these unsupervised algorithms divide the features into classes, this division is based on data patterns identified by the algorithm, and the objects are grouped on the defined class based on similar behaviour (Dubey and Choubey, 2017). For the following algorithms the also unsupervised PCA scaled data will be applied, the reason is that the scaled data still have a high performance, even though being lower compared to the other methods, but the sparse distribution of the components contributes to better visualization.
+Clustering is a valuable set of methods used in many applications, these unsupervised algorithms divide the features into classes, this division is based on data patterns identified by the algorithm, and the objects are grouped on the defined class based on similar behaviour (Dubey and Choubey, 2017). For the following algorithms, the also unsupervised PCA transformed data was applied,  since this method resulted in a more sparse distribution of observations that contributes to better grouping and visualization.
 
 
 ### **K-Means Clustering**
@@ -466,7 +465,7 @@ print(SBD.rf)
 plot(SBD.rf, main = "SBD Random Forest" )
 ```
 
-The non-transformed data were fitted in the random forest classifier method and resulted in an estimated error rate of 0.65% after running 500 decision trees, which is extremely good. The confusion matrix shows the superb predictive power of the model.However, The fact that not every good and precise model performs as accurate in real-world scenarios should be considered (Kumar, 2020). The same code will be adapted and applied to the data transformed by the LDA method, and the results compared. 
+The non-transformed data were fitted in the random forest classifier method and resulted in an estimated error rate of 0.65% after running 500 decision trees, which is extremely good. The confusion matrix shows the superb predictive power of the model.However, The fact that not every good and precise model performs as accurate in real-world scenarios should be considered (Kumar, 2020). The same code was adapted and applied to the data transformed by the LDA method, and the results compared. 
 
 #### **LDA transformed Random Forest Classification**
 
@@ -488,8 +487,8 @@ The accuracy score comparison indicates the LDA transformed data as the best app
 
   Mostly used as a classifier, K-Nearest Neighbours or KNN method do its calculations using euclidean distance. This supervised non-parametric method is known for its simplicity and efficacy (Taunk et al., 2019).
 
-#### **SBD K-Nearest Neighbours**
 
+#### **SBD K-Nearest Neighbours**
 ```{r, warning=FALSE,echo = FALSE} 
 classifier_knn <- knn(train = training_set,
                       test = test_set ,
@@ -503,6 +502,7 @@ cm
 misClassError <- mean(classifier_knn != test_set$Class)
 print(paste('SBD Accuracy =', 1-misClassError))
 ```
+
 
 #### **LDA transformed K-Nearest Neighbours**
 ```{r, warning=FALSE,echo = FALSE} 
@@ -524,8 +524,8 @@ The K-Nearest Neighbours prediction using Euclidean distance is displayed by the
 
   Another supervised method, decision tree method combines a sequence of straightforward techniques, in which each one makes use of a threshold value as a metric against possible values, this method classifies the data that fall in a particular region as integrated to the most recurrent class in that region. The decision tree's main goal is to depict a tree with its findings data patterns accomplished by checking which test best separate the different cases into classes (Kotsiantis, 2011).
 
-#### **SBD Decision tree**
 
+#### **SBD Decision tree**
 ```{r, warning=FALSE,echo = FALSE} 
 tree.SBD <- rpart(Class ~., data = training_set)
 rpart.plot(tree.SBD)
@@ -538,15 +538,12 @@ printcp(tree.SBD)
 plotcp(tree.SBD)
 ```
 
-
-
 ```{r, warning=FALSE,echo = FALSE} 
 p <- predict(tree.SBD, training_set, type = 'class')
 confusionMatrix(p, training_set$Class )
 ```
 
 Amazing 99.4% accuracy obtained, the confusion matrix only reported nine false negatives, and twenty false positives in 5057 observation. 
-
 
 ```{r, warning=FALSE,echo = FALSE}
 p1 <- predict(tree.SBD, test_set, type = 'prob')
@@ -568,7 +565,6 @@ plot.roc(r1,
 ROC curves can be employed to distinguish the balance of sensitivity and specificity when dealing with binary classifiers, the result can be interpreted as a measure of the predictive robustness of a model (Horton, 2016). As expected from the previous results the ROC curve displays a result close to perfection, the bidding behaviour is indeed very predictable as observed in the true positive rate (y-axis) versus false positive rate (x-axis) as also shown in the confusion matrix.
 
 #### **LDA transformed Decision tree**
-
 ```{r, warning=FALSE,echo = FALSE} 
 tree.LDA <- rpart(class ~ .,data = training_set_lda)
 rpart.plot(tree.LDA)
@@ -581,12 +577,10 @@ printcp(tree.LDA)
 plotcp(tree.LDA)
 ```
 
-
 ```{r, warning=FALSE,echo = FALSE} 
 p <- predict(tree.LDA, training_set_lda, type = 'class')
 confusionMatrix(p, training_set_lda$class )
 ```
-
 
 ```{r, warning=FALSE,echo = FALSE}
 p1 <- predict(tree.LDA, test_set_lda, type = 'prob')
@@ -607,32 +601,79 @@ plot.roc(r1,
 
 The LDA transformed data resulted in perfect predictions, reporting even better results than the already exceptional obtained from the untransformed data.
 
-
 ### **Comparison of ML algorithms for Classification**
 
 Every single supervised algorithm resulted in an outstanding performance, Random Forest Classification, K-Nearest Neighbours and Decision Tree resulted in an accuracy score of over 98% on SBD predictions and 100% on LDA transformed data, with minor differences between them. K-Nearest Neighbours had the best accuracy score, however, the difference is negligible, it is safe to say that all algorithms applied are suitable for predictions on SBD.
 
-
-
 # **Conclusion**
 
-  As a result of the comparison between scaled methods, it was observed that, except for the PCA, the standard scaling did not affect the result of the predictions, yet the scaling sparsed the data and allowed its observation to be better displayed in the diagnostic plots. Scaled PCA resulted in a more sparsed and two-dimensional plot, nevertheless, the LDA still had a better accuracy score when applied to random forest classification, being the method of choice for following classification algorithms. 
+  As a result of the dimensionality reduction methods, it was observed that the PCA empowered the clustering methods with a higher level of discrimination between groups. Scaled PCA resulted in more sparsed observations in the two-dimensional plot. The three classification methods employed in this report had magnificent results, especially K-Nearest Neighbours, achieving perfect predictions in both LDA-transformed and untransformed data. The LDA methods resulted in a more versatile one dimensionaç analysis, with a clear separation between classes, easily observed in diagnostic graphics.
   
-  Three supervised algorithms were implemented for classification purposes, Random Forest, K-Nearest Neighbours and Decision Tree. Every single one of these algorithms resulted in an outstanding accuracy score, being excellent to make predictions for the normal and abnormal bidding behaviour, especially normal, because of the massive amount of observation that falls into this category. For the unsupervised algorithms, two clustering methods were applied using the scaled PCA data, K-Means Clustering and Hierarchical Agglomerative Clustering. It was observed in both algorithms clear division of the data into three distinct patterns, being two of them associated with normal bidding behaviour and one with abnormal.
+  Three supervised algorithms were implemented for classification purposes, Random Forest, K-Nearest Neighbours and Decision Tree. Every single one of these algorithms resulted in an outstanding accuracy score, being excellent in extracting predictions for the normal and abnormal bidding behaviour, exceptionally normal, because of the massive amount of observation that falls into this category. Two clustering methods were applied for the unsupervised algorithms using the PCA transformed data, K-Means Clustering and Hierarchical Agglomerative Clustering. It was observed in both algorithms clear division of the data into four distinct patterns, three associated with normal bidding behaviour and one with abnormal.
   
-   A Further step to improve the prediction power of these models for the detection of abnormal behaviour, that may be associated with scams and other unwanted conducts, could be adding more data with feature values associated with the abnormal bidding pattern observed in the algorithms implemented. Considering the results, it is conclusive that all implemented algorithms performed extremely well, specially K-nearest neighbours regression with feature reduced data by LDA.
+   A further step to improve the prediction power of these models for the detection of abnormal behaviour, putatively associated with scams and other unwanted conduct, could be adding more data with feature values associated with the abnormal bidding patterns observed in the algorithms implemented. Considering the results, it is conclusive that all implemented algorithms performed extremely well, especially K-nearest neighbours regression with feature reduced data by LDA.
+
+
 
 
 # **References**
+Alzahrani, A. and Sadaoui, S. (2018). Scraping and preprocessing commercial auction data for fraud classification.
 
-finnstats (2021). Linear Discriminant Analysis in R | R-bloggers. [online] Available at: https://www.r-bloggers.com/2021/05/linear-discriminant-analysis-in-r/.
+Analytics Vidhya. (2021). Tackling Missing Value in Dataset. [online] Available at: https://www.analyticsvidhya.com/blog/2021/10/handlingmissing-value/#:~:text=Missing%20value%20can%20bias%20the [Accessed 28 Apr. 2022].
+
+Asaithambi, S. (2017). Why, How and When to Scale your Features. [online] Medium. Available at: https://medium.com/greyatom/why-howand-when-to-scale-your-features-4b30ab09db5e.
+
+Askpython (2020). Split Training and Testing Data Sets in Python - AskPython. [online] Available at: https://www.askpython.com/python/examples/split-data-training-and-testing-set#:~:text=The%20most%20common%20split%20ratio [Accessed 19 May 2022].
+
+Capozzoli, A., Cerquitelli, T. and Piscitelli, M.S. (2016). Enhancing energy efficiency in buildings through innovative data analytics technologiesa. Pervasive Computing, pp.353–389
+
+Dubey, A. and Choubey, A.P.D.A., 2017. A systematic review on k-means clustering techniques. Int J Sci Res Eng Technol (IJSRET, ISSN 2278–0882), 6(6).
+
+Duvva, P. (2021). LDA vs. PCA – Towards AI. [online] Available at: https://towardsai.net/p/data-science/lda-vspca#:~:text=LDA%20focuses%20on%20finding%20
+
+Finnstats (2021). Linear Discriminant Analysis in R | R-bloggers. [online] Available at: https://www.r-bloggers.com/2021/05/linear-discriminant-analysis-in-r/.
+
+Galarnyk, M. (2018). Understanding Boxplots. [online] Medium. Available at: https://towardsdatascience.com/understanding-boxplots5e2df7bcbd51.
+
+GeeksforGeeks. (2020). Normalization vs Standardization. [online] Available at: https://www.geeksforgeeks.org/normalization-vsstandardization/ [Accessed 1 May 2022].
+
+Han, J., Kamber, M. and Pei, J. (2012). Introduction. Data Mining, pp.1–38.
 
 Hayden, L.(2018). R PCA Tutorial (Principal Component Analysis). [online] Available at: https://www.datacamp.com/tutorial/pca-analysis-r [Accessed 16 Jun. 2022].
 
 Horton, B.(2016). ROC Curves in Two Lines of R Code. [online] Available at: https://blog.revolutionanalytics.com/2016/08/roc-curves-in-two-lines-of-code.html#:~:text=ROC%20curves%20are%20commonly%20used [Accessed 20 Jun. 2022].
 
+Hunt, C. (2019). Why you shouldn’t use pie charts. [online] Statistical Consulting Centre. Available at: https://scc.ms.unimelb.edu.au/resources-list/data-visualisation-and-exploration/no_piecharts#:~:text=Pies%20and%20doughnuts%20fail%20because [Accessed 27 Apr. 2022]
+
 Johnson, D.(2022). Decision Tree in R with Example. [online] Available at: https://www.guru99.com/r-decision-trees.html.
+
+Jolliffe, I.T. and Cadima, J. (2016). Principal component analysis: a review and recent developments. Philosophical Transactions of the Royal Society A: Mathematical, Physical and Engineering Sciences, 374(2065), p.20150202. doi:10.1098/rsta.2015.0202.
+
+Khurana, U., Samulowitz, H. and Turaga, D. (2018) “Feature Engineering for Predictive Modeling Using Reinforcement Learning”, Proceedings of the AAAI Conference on Artificial Intelligence, 32(1). Available at: https://ojs.aaai.org/index.php/AAAI/article/view/11678
+
+Kohli, S. (2019). Understanding a Classification Report For Your Machine Learning Model. [online] Medium. Available at: https://medium.com/@kohlishivam5522/understanding-a-classification-report-for-your-machine-learning-model-88815e2ce397.
+
+Kotsiantis, S.B. (2011). Decision trees: a recent overview. Artificial Intelligence Review, 39(4), pp.261–283. doi:10.1007/s10462-011-9272-4.
+
+Kumar, S. (2020). 9 Reasons why Machine Learning models not perform well in production. [online] Medium. Available at: https://towardsdatascience.com/9-reasons-why-machine-learning-models-not-perform-well-in-production-4497d3e3e7a5 [Accessed 20 May 2022].
+
+Maklin, C. (2019). K-means Clustering Python Example. [online] Medium. Available at: https://towardsdatascience.com/machine-learningalgorithms-part-9-k-means-example-in-python-f2ad05ed5203.
+
+More, A.S. and Rana, D.P. (2017). Review of random forest classification techniques to resolve data imbalance. 2017 1st International Conference on Intelligent Systems and Information Management (ICISIM). doi:10.1109/icisim.2017.8122151.
+
+Murtagh, F. and Contreras, P. (2017). Algorithms for hierarchical clustering: an overview, II. Wiley Interdisciplinary Reviews: Data Mining and Knowledge Discovery, 7(6), p.e1219. doi:10.1002/widm.1219.
+
+Ray, S. (2019). A Quick Review of Machine Learning Algorithms. [online] IEEE Xplore. doi:10.1109/COMITCon.2019.8862451.
+
+Sen, P.C., Hajra, M. and Ghosh, M. (2019). Supervised Classification Algorithms in Machine Learning: A Survey and Review. Advances in Intelligent Systems and Computing, pp.99–111. doi:10.1007/978-981-13-7403-6_11.
+
+Sharma, A. and Paliwal, K.K. (2014). Linear discriminant analysis for the small sample size problem: an overview. International Journal of Machine Learning and Cybernetics, 6(3), pp.443–454. doi:10.1007/s13042-013-0226-9.
+
+Sullivan, J. (2018). Data Cleaning with Python and Pandas: Detecting Missing Values. [online] Medium. Available at: https://towardsdatascience.com/data-cleaning-with-python-and-pandas-detecting-missing-values-3e9c6ebcf78b.
+
+Taunk, K., De, S., Verma, S. and Swetapadma, A. (2019). A Brief Review of Nearest Neighbor Algorithm for Learning and Classification. [online] IEEE Xplore. doi:10.1109/ICCS45141.2019.9065747.
 
 Tibshirani, R., Walther, G. and Hastie, T. (2001). Estimating the number of clusters in a data set via the gap statistic. Journal of the Royal Statistical Society: Series B (Statistical Methodology), [online] 63(2), pp.411–423. doi:10.1111/1467-9868.00293.
 
 Zach (2020). Linear Discriminant Analysis in R (Step-by-Step). [online] Statology. Available at: https://www.statology.org/linear-discriminant-analysis-in-r/.
+
